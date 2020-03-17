@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/yowcow/stubby.svg?branch=master)](https://travis-ci.com/yowcow/stubby)
+
 stubby
 ======
 
