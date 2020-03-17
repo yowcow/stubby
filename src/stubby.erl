@@ -1,6 +1,7 @@
 -module(stubby).
 
 -export([
+         start/0,
          start/1,
          start/2,
          stop/0,
@@ -9,14 +10,19 @@
 
 -type cowboy_route_match() :: '_' | iodata().
 -type cowboy_route_path() :: {Path::cowboy_route_match(), Handler::module(), Opts::any()}.
+-type url() :: string().
 
 -define(LISTENER, ?MODULE).
 
--spec start([cowboy_route_path()]) -> string().
+-spec start() -> url().
+start() ->
+    start([]).
+
+-spec start([cowboy_route_path()]) -> url().
 start(Routes) ->
     start("localhost", Routes).
 
--spec start(string(), [cowboy_route_path()]) -> string().
+-spec start(string(), [cowboy_route_path()]) -> url().
 start(Host, Routes) ->
     ok = stubby_recorder:start(),
     ok = application:start(ranch),

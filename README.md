@@ -23,12 +23,14 @@ In testing, e.g., common tests, have:
 
 ```erlang
 init_per_suite(Config) ->
-    Url = stubby:start([]),
+    Url = stubby:start(),
     [{url, Url} | Config].
 
 end_per_suite(_) ->
     ok = stubby:stop().
 ```
+
+(See src/stubby.erl for more options starting up a server)
 
 In a testcase, make a request to stubby url, then get the most recent request body with:
 

@@ -6,7 +6,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 init_per_suite(Config) ->
-    Url = stubby:start([]) ++ "/blackhole/",
+    Url = stubby:start() ++ "/blackhole/",
     [{url, Url} | Config].
 
 end_per_suite(_) ->
