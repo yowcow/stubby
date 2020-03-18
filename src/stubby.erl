@@ -5,12 +5,16 @@
          start/1,
          start/2,
          stop/0,
-         get_recent/0
+         get_recent/0,
+         get_recent/1
         ]).
 
 -type cowboy_route_match() :: '_' | iodata().
 -type cowboy_route_path() :: {Path::cowboy_route_match(), Handler::module(), Opts::any()}.
 -type url() :: string().
+
+-type get_recent_option() :: {retry, integer()} | {interval, integer()}.
+-type get_recent_options() :: [get_recent_option()].
 
 -define(LISTENER, ?MODULE).
 
@@ -74,3 +78,20 @@ stop() ->
 -spec get_recent() -> stubby_recorder:result().
 get_recent() ->
     stubby_recorder:get_recent().
+
+-spec get_recent(get_recent_options()) -> stubby_recorder:result().
+get_recent(Options) ->
+    Retry = proplists:get_value(retry, Options, 0),
+    Interval = proplists:get_value(interval, Options, 0),
+    get_recent(Retry, Interval).
+
+get_recent(0, _) ->
+    stubby_recorder:get_recent();
+get_recent(Retry, Interval) ->
+    case stubby_recorder:get_recent() of
+        {ok, _} = Result ->
+            Result;
+        _ ->
+            timer:sleep(Interval),
+            get_recent(Retry - 1, Interval)
+    end.

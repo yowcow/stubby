@@ -16,7 +16,9 @@ end_per_suite(_) ->
 all() ->
     [
      request_plain_test,
-     request_gzip_test
+     request_gzip_test,
+     slow_request_with_retry_ok_test,
+     never_succeed_retry_test
     ].
 
 request_plain_test(Config) ->
@@ -48,3 +50,32 @@ request_gzip_test(Config) ->
              []
             ),
     ?assertEqual({ok, Body}, stubby:get_recent()).
+
+slow_request_with_retry_ok_test(Config) ->
+    Url = ?config(url, Config),
+    Body = <<"sent after 50 ms">>,
+    spawn(fun() ->
+                  timer:sleep(50), % make a request with delay
+                  httpc:request(
+                    post,
+                    {Url, [], "text/plain", Body},
+                    [],
+                    []
+                   )
+          end),
+    Result = stubby:get_recent(
+               [
+                {retry, 1},
+                {interval, 100}
+               ]
+              ), % retry with interval after the first failure
+    ?assertEqual({ok, Body}, Result).
+
+never_succeed_retry_test(_) ->
+    Result = stubby:get_recent(
+               [
+                {retry, 2},
+                {interval, 50}
+               ]
+              ), % retry with interval after the first failure
+    ?assertEqual({error, no_data}, Result).
