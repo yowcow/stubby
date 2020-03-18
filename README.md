@@ -38,6 +38,12 @@ In a testcase, make a request to stubby url, then get the most recent request bo
 {ok, Body} = stubby:get_recent()
 ```
 
+If the request is expected to arrive after a delay, retry (times) with interval (ms) between each try:
+
+```erlang
+{ok, Body} = stubby:get_recent([{retry, 5}, {interval, 100}])
+```
+
 See also
 --------
 
