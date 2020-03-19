@@ -52,31 +52,27 @@ request_gzip_test(Config) ->
 
 slow_request_awaits_test(Config) ->
     Url = ?config(url, Config),
-    spawn(fun() ->
-                  timer:sleep(100),
-                  {ok, {
-                     {"HTTP/1.1", 204, _},
-                     _,
-                     _
-                    }} = httpc:request(
-                           post,
-                           {Url, [], "text/plain", <<"slow req after 100 ms">>},
-                           [],
-                           []
-                          )
-          end),
-    spawn(fun() ->
-                  timer:sleep(50),
-                  {ok, {
-                     {"HTTP/1.1", 204, _},
-                     _,
-                     _
-                    }} = httpc:request(
-                           post,
-                           {Url, [], "text/plain", <<"slow req after 50 ms">>},
-                           [],
-                           []
-                          )
-          end),
-    ?assertEqual({ok, <<"slow req after 50 ms">>}, stubby:get_recent()),
-    ?assertEqual({ok, <<"slow req after 100 ms">>}, stubby:get_recent()).
+    Reqs = [
+            {<<"slow req after 100 ms">>, 100},
+            {<<"fast req after 10 ms">>, 10}
+           ],
+    [
+     spawn(fun() ->
+                   timer:sleep(Time),
+                   httpc:request(
+                     post,
+                     {Url, [], "text/plain", Body},
+                     [],
+                     []
+                    )
+           end)
+     || {Body, Time} <- Reqs
+    ],
+    ?assertEqual([
+                  {ok, <<"fast req after 10 ms">>},
+                  {ok, <<"slow req after 100 ms">>}
+                 ],
+                 [
+                  stubby:get_recent(),
+                  stubby:get_recent()
+                 ]).
