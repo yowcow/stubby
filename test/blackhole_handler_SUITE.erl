@@ -16,7 +16,8 @@ end_per_suite(_) ->
 all() ->
     [
      request_plain_test,
-     request_gzip_test
+     request_gzip_test,
+     slow_request_awaits_test
     ].
 
 request_plain_test(Config) ->
@@ -48,3 +49,34 @@ request_gzip_test(Config) ->
              []
             ),
     ?assertEqual({ok, Body}, stubby:get_recent()).
+
+slow_request_awaits_test(Config) ->
+    Url = ?config(url, Config),
+    spawn(fun() ->
+                  timer:sleep(100),
+                  {ok, {
+                     {"HTTP/1.1", 204, _},
+                     _,
+                     _
+                    }} = httpc:request(
+                           post,
+                           {Url, [], "text/plain", <<"slow req after 100 ms">>},
+                           [],
+                           []
+                          )
+          end),
+    spawn(fun() ->
+                  timer:sleep(50),
+                  {ok, {
+                     {"HTTP/1.1", 204, _},
+                     _,
+                     _
+                    }} = httpc:request(
+                           post,
+                           {Url, [], "text/plain", <<"slow req after 50 ms">>},
+                           [],
+                           []
+                          )
+          end),
+    ?assertEqual({ok, <<"slow req after 50 ms">>}, stubby:get_recent()),
+    ?assertEqual({ok, <<"slow req after 100 ms">>}, stubby:get_recent()).

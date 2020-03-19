@@ -6,13 +6,21 @@
          put_recent/1,
          get_recent/0
         ]).
+
+-ifdef(TEST).
+-export([
+         enqueue/2,
+         dequeue/1
+        ]).
+-endif.
+
 -export_type([
               body/0,
               result/0
              ]).
 
 -type body() :: binary().
--type result() :: {ok, body()} | {error, no_data}.
+-type result() :: {ok, body()}.
 
 -define(RECORDER, ?MODULE).
 
@@ -26,21 +34,35 @@ stop() ->
     stop_recorder().
 
 start_recorder() ->
-    loop([]).
+    loop([], []).
 
-loop(Stack) ->
+enqueue(Item, Queue) ->
+    [Item | Queue].
+
+dequeue(Queue) ->
+    [Item|L] = lists:reverse(Queue),
+    {Item, lists:reverse(L)}.
+
+loop(Records, Getters) ->
     receive
         {put, From, Data} ->
             From ! ok,
-            loop([Data|Stack]);
-        {get, From} ->
-            case Stack of
-                [Data|L] ->
-                    From ! {ok, Data},
-                    loop(L);
+            case Getters of
                 [] ->
-                    From ! {error, no_data},
-                    loop([])
+                    loop(enqueue(Data, Records), []);
+                _ ->
+                    {Getter, L} = dequeue(Getters),
+                    Getter ! {ok, Data},
+                    loop(Records, L)
+            end;
+        {get, Getter} ->
+            case Records of
+                [] ->
+                    loop([], enqueue(Getter, Getters));
+                _ ->
+                    {Data, L} = dequeue(Records),
+                    Getter! {ok, Data},
+                    loop(L, Getters)
             end;
         {quit, From} ->
             From ! ok,
