@@ -24,25 +24,31 @@
 
 -define(RECORDER, ?MODULE).
 
+%% @doc Starts and registers a recorder process.
 -spec start() -> ok.
 start() ->
     true = register(?RECORDER, spawn(fun start_recorder/0)),
     ok.
 
+%% @doc Stops running recorder process.
 -spec stop() -> ok.
 stop() ->
     stop_recorder().
 
+%% @private
 start_recorder() ->
     loop([], []).
 
+%% @private
 enqueue(Item, Queue) ->
     [Item | Queue].
 
+%% @private
 dequeue(Queue) ->
     [Item|L] = lists:reverse(Queue),
     {Item, lists:reverse(L)}.
 
+%% @private
 loop(Records, Getters) ->
     receive
         {put, From, Data} ->
@@ -69,11 +75,14 @@ loop(Records, Getters) ->
             ok
     end.
 
+%% @doc Puts a record into FIFO queue.
 -spec put_recent(body()) -> ok.
 put_recent(Data) ->
     ?RECORDER ! {put, self(), Data},
     receive X -> X end.
 
+%% @doc Gets a record from FIFO queue.
+%% If empty, the call is blocked until the next enqueue.
 -spec get_recent() -> result().
 get_recent() ->
     ?RECORDER ! {get, self()},
