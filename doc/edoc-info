@@ -1,0 +1,4 @@
+%% encoding: UTF-8
+{application,stubby}.
+{modules,[stubby,stubby_blackhole_handler,stubby_default_handler,
+          stubby_recorder]}.

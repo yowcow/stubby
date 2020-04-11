@@ -1,7 +1,7 @@
 REBAR := rebar3
 
 all:
-	$(REBAR) compile
+	$(REBAR) do compile,edoc
 
 test:
 	$(REBAR) do eunit,ct,dialyzer,xref
