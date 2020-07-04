@@ -6,8 +6,13 @@
 -include_lib("eunit/include/eunit.hrl").
 
 init_per_suite(Config) ->
-    Url = stubby:start() ++ "/blackhole/",
-    [{url, Url} | Config].
+    Path = "/blackhole/",
+    Url = stubby:start() ++ Path,
+    [
+     {url, Url},
+     {path, Path}
+     | Config
+    ].
 
 end_per_suite(_) ->
     ok = stubby:stop(),
@@ -33,7 +38,8 @@ request_plain_test(Config) ->
              [],
              []
             ),
-    ?assertEqual({ok, Body}, stubby:get_recent()).
+    {ok, #{body := Data}} = stubby:get_recent(?config(path, Config)),
+    ?assertEqual(Body, Data).
 
 request_gzip_test(Config) ->
     Url = ?config(url, Config),
@@ -48,7 +54,8 @@ request_gzip_test(Config) ->
              [],
              []
             ),
-    ?assertEqual({ok, Body}, stubby:get_recent()).
+    {ok, #{body := Data}} = stubby:get_recent(?config(path, Config)),
+    ?assertEqual(Body, Data).
 
 slow_request_awaits_test(Config) ->
     Url = ?config(url, Config),
@@ -68,11 +75,17 @@ slow_request_awaits_test(Config) ->
            end)
      || {Body, Time} <- Reqs
     ],
-    ?assertEqual([
-                  {ok, <<"fast req after 10 ms">>},
-                  {ok, <<"slow req after 100 ms">>}
-                 ],
-                 [
-                  stubby:get_recent(),
-                  stubby:get_recent()
-                 ]).
+    ?assertEqual(
+       [
+        <<"fast req after 10 ms">>,
+        <<"slow req after 100 ms">>
+       ],
+       [
+        Data
+        || {ok, #{body := Data}}
+           <- [
+               stubby:get_recent(?config(path, Config)),
+               stubby:get_recent(?config(path, Config))
+              ]
+       ]
+      ).

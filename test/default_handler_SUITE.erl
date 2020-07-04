@@ -24,7 +24,9 @@ end_per_suite(_) ->
 all() ->
     [
      request_root_test,
-     request_injected_route_test
+     request_injected_route_test,
+     recorded_injected_route_test,
+     recorded_root_test
     ].
 
 request_root_test(Config) ->
@@ -34,5 +36,27 @@ request_root_test(Config) ->
 
 request_injected_route_test(Config) ->
     Url = ?config(url, Config),
-    Result = httpc:request(Url ++ "/hello/world"),
+    Result = httpc:request(get, {Url ++ "/hello/world?foo=bar", []}, [], []),
     ?assertMatch({ok, {{"HTTP/1.1", 200, "OK"}, _, "world"}}, Result).
+
+recorded_root_test(_) ->
+    {ok, Record} = stubby:get_recent("/"),
+    ?assertMatch(
+       #{
+         body := <<>>,
+         path := <<"/">>,
+         qs := <<>>
+        },
+       Record
+      ).
+
+recorded_injected_route_test(_) ->
+    {ok, Record} = stubby:get_recent("/hello/world"),
+    ?assertMatch(
+       #{
+         body := <<>>,
+         path := <<"/hello/world">>,
+         qs := <<"foo=bar">>
+        },
+       Record
+      ).

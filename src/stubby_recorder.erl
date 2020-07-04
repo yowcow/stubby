@@ -3,23 +3,16 @@
 -export([
          start/0,
          stop/0,
-         put_recent/1,
-         get_recent/0
+         put_recent/2,
+         get_recent/1
         ]).
-
--ifdef(TEST).
--export([
-         enqueue/2,
-         dequeue/1
-        ]).
--endif.
 
 -export_type([
               body/0,
               result/0
              ]).
 
--type body() :: binary().
+-type body() :: term().
 -type result() :: {ok, body()}.
 
 -define(RECORDER, ?MODULE).
@@ -37,38 +30,48 @@ stop() ->
 
 %% @private
 start_recorder() ->
-    loop([], []).
+    loop(#{}, #{}).
 
 %% @private
-enqueue(Item, Queue) ->
-    [Item | Queue].
+enqueue(Key, Item, Tree) ->
+    case Tree of
+        #{Key := Queue} ->
+            Tree#{Key => [Item|Queue]};
+        _ ->
+            Tree#{Key => [Item]}
+    end.
 
 %% @private
-dequeue(Queue) ->
-    [Item|L] = lists:reverse(Queue),
-    {Item, lists:reverse(L)}.
+dequeue(Key, Tree) ->
+    case Tree of
+        #{Key := []} ->
+            none;
+        #{Key := Queue} ->
+            [Item|T] = lists:reverse(Queue),
+            {Item, Tree#{Key => lists:reverse(T)}};
+        _ ->
+            none
+    end.
 
 %% @private
 loop(Records, Getters) ->
     receive
-        {put, From, Data} ->
+        {put, From, Key, Data} ->
             From ! ok,
-            case Getters of
-                [] ->
-                    loop(enqueue(Data, Records), []);
+            case dequeue(Key, Getters) of
+                {KeyGetter, Getters1} ->
+                    KeyGetter ! {ok, Data},
+                    loop(Records, Getters1);
                 _ ->
-                    {Getter, L} = dequeue(Getters),
-                    Getter ! {ok, Data},
-                    loop(Records, L)
+                    loop(enqueue(Key, Data, Records), Getters)
             end;
-        {get, Getter} ->
-            case Records of
-                [] ->
-                    loop([], enqueue(Getter, Getters));
+        {get, Getter, Key} ->
+            case dequeue(Key, Records) of
+                {Data, Records1} ->
+                    Getter ! {ok, Data},
+                    loop(Records1, Getters);
                 _ ->
-                    {Data, L} = dequeue(Records),
-                    Getter! {ok, Data},
-                    loop(L, Getters)
+                    loop(Records, enqueue(Key, Getter, Getters))
             end;
         {quit, From} ->
             From ! ok,
@@ -76,18 +79,122 @@ loop(Records, Getters) ->
     end.
 
 %% @doc Puts a record into FIFO queue.
--spec put_recent(body()) -> ok.
-put_recent(Data) ->
-    ?RECORDER ! {put, self(), Data},
+-spec put_recent(term(), body()) -> ok.
+put_recent(Key, Data) ->
+    ?RECORDER ! {put, self(), Key, Data},
     receive X -> X end.
 
 %% @doc Gets a record from FIFO queue.
 %% If empty, the call is blocked until the next enqueue.
--spec get_recent() -> result().
-get_recent() ->
-    ?RECORDER ! {get, self()},
+-spec get_recent(term()) -> result().
+get_recent(Key) ->
+    ?RECORDER ! {get, self(), Key},
     receive X -> X end.
 
 stop_recorder() ->
     ?RECORDER ! {quit, self()},
     receive X -> X end.
+
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+enqueue_test_() ->
+    Cases = [
+             {
+              "0 element",
+              foo,
+              foo,
+              #{bar => []},
+              #{
+                foo => [foo],
+                bar => []
+               }
+             },
+             {
+              "1 element",
+              foo,
+              bar,
+              #{
+                foo => [foo],
+                bar => []
+               },
+              #{
+                foo => [bar, foo],
+                bar => []
+               }
+             },
+             {
+              "2 elements",
+              foo,
+              buz,
+              #{
+                foo => [bar, foo],
+                bar => []
+               },
+              #{
+                foo => [buz, bar, foo],
+                bar => []
+               }
+             }
+            ],
+    F = fun({Title, Key, Input, Queue, Expected}) ->
+                Actual = enqueue(Key, Input, Queue),
+                {Title, ?_assertEqual(Expected, Actual)}
+        end,
+    lists:map(F, Cases).
+
+dequeue_test_() ->
+    Cases = [
+             {
+              "0 element",
+              bar,
+              #{
+                foo => [foo],
+                bar => []
+               },
+              none
+             },
+             {
+              "1 element",
+              foo,
+              #{
+                foo => [foo],
+                bar => []
+               },
+              {foo, #{
+                      foo => [],
+                      bar => []
+                     }}
+             },
+             {
+              "2 elements",
+              foo,
+              #{
+                foo => [bar, foo],
+                bar => []
+               },
+              {foo, #{
+                      foo => [bar],
+                      bar => []
+                     }}
+             },
+             {
+              "3 elements",
+              foo,
+              #{
+                foo => [buz, bar, foo],
+                bar => []
+               },
+              {foo, #{
+                      foo => [buz, bar],
+                      bar => []
+                     }}
+             }
+            ],
+    F = fun({Title, Key, Input, Expected}) ->
+                Actual = dequeue(Key, Input),
+                {Title, ?_assertEqual(Expected, Actual)}
+        end,
+    lists:map(F, Cases).
+-endif.
