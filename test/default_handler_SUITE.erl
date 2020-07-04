@@ -43,7 +43,7 @@ recorded_root_test(_) ->
     {ok, Record} = stubby:get_recent("/"),
     ?assertMatch(
        #{
-         data := <<>>,
+         body := <<>>,
          path := <<"/">>,
          qs := <<>>
         },
@@ -54,7 +54,7 @@ recorded_injected_route_test(_) ->
     {ok, Record} = stubby:get_recent("/hello/world"),
     ?assertMatch(
        #{
-         data := <<>>,
+         body := <<>>,
          path := <<"/hello/world">>,
          qs := <<"foo=bar">>
         },

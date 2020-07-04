@@ -32,11 +32,27 @@ end_per_suite(_) ->
 
 (See src/stubby.erl for more options starting up a server)
 
-In a testcase, make a request to stubby url, then get the most recent request body with:
+By default, a booted stubby serves:
+
+* `/`: always respond with status code 200
+* `/blackhole/[...]`: always respond with status code 204
+
+In a testcase, make a request to stubby URL, then get the most recent request to the **specified** path with:
 
 ```erlang
-{ok, Body} = stubby:get_recent()
+{ok, #{
+  headers := Headers,
+  scheme := Scheme,
+  host := Host,
+  port := Port,
+  path := Path,
+  qs := QueryString,
+  body := Body
+ }} = stubby:get_recent("/path/to/endopoint")
 ```
+
+When no request is recorded yet, this call blocks until the first request is made.
+
 
 See also
 --------

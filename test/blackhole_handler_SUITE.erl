@@ -38,7 +38,7 @@ request_plain_test(Config) ->
              [],
              []
             ),
-    {ok, #{data := Data}} = stubby:get_recent(?config(path, Config)),
+    {ok, #{body := Data}} = stubby:get_recent(?config(path, Config)),
     ?assertEqual(Body, Data).
 
 request_gzip_test(Config) ->
@@ -54,7 +54,7 @@ request_gzip_test(Config) ->
              [],
              []
             ),
-    {ok, #{data := Data}} = stubby:get_recent(?config(path, Config)),
+    {ok, #{body := Data}} = stubby:get_recent(?config(path, Config)),
     ?assertEqual(Body, Data).
 
 slow_request_awaits_test(Config) ->
@@ -82,7 +82,7 @@ slow_request_awaits_test(Config) ->
        ],
        [
         Data
-        || {ok, #{data := Data}}
+        || {ok, #{body := Data}}
            <- [
                stubby:get_recent(?config(path, Config)),
                stubby:get_recent(?config(path, Config))
