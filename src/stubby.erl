@@ -5,7 +5,7 @@
          start/1,
          start/2,
          stop/0,
-         get_recent/0
+         get_recent/1
         ]).
 
 %% See https://github.com/ninenines/cowboy/blob/master/src/cowboy_router.erl for details.
@@ -51,7 +51,14 @@ start(Host, Routes) ->
     {ok, _} = cowboy:start_clear(
                 ?LISTENER,
                 [{port, 0}],
-                #{env => #{dispatch => Dispatch}}
+                #{
+                  env => #{dispatch => Dispatch},
+                  middlewares => [
+                                  cowboy_router,
+                                  stubby_recorder_middleware,
+                                  cowboy_handler
+                                 ]
+                 }
                ),
     Url = lists:flatten(io_lib:format("http://~s:~p", [Host, ranch:get_port(?LISTENER)])),
     ok = check_ready(Url),
@@ -79,6 +86,6 @@ stop() ->
 
 %% @doc Fetches a record from the recorder FIFO queue.
 %% If empty, the call is blocked until the next enqueue.
--spec get_recent() -> stubby_recorder:result().
-get_recent() ->
-    stubby_recorder:get_recent().
+-spec get_recent(string()) -> stubby_recorder:result().
+get_recent(Path) ->
+    stubby_recorder:get_recent(list_to_binary(Path)).

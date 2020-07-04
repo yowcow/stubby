@@ -12,7 +12,7 @@
               result/0
              ]).
 
--type body() :: binary().
+-type body() :: term().
 -type result() :: {ok, body()}.
 
 -define(RECORDER, ?MODULE).
