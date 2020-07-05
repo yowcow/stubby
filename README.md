@@ -15,9 +15,13 @@ Build
 How to use
 ----------
 
+### Configuration
+
 In rebar.config deps, have:
 
     {stubby, {git, "git://github.com/yowcow/stubby", {branch, "master}}}
+
+### Testing
 
 In testing, e.g., common tests, have:
 
@@ -30,12 +34,7 @@ end_per_suite(_) ->
     ok = stubby:stop().
 ```
 
-(See src/stubby.erl for more options starting up a server)
-
-By default, a booted stubby serves:
-
-* `/`: always respond with status code 200
-* `/blackhole/[...]`: always respond with status code 204
+See src/stubby.erl for more options starting up a server.
 
 In a testcase, make a request to stubby URL, then get the most recent request to the **specified** path with:
 
@@ -52,6 +51,24 @@ In a testcase, make a request to stubby URL, then get the most recent request to
 ```
 
 When no request is recorded yet, this call blocks until the first request is made.
+
+
+Endpoints
+---------
+
+By default, a booted stubby serves:
+
+* `/`: always responds with status code 200
+* `/blackhole/[...]`: always responds with status code 204
+
+Additional cowboy endpoints can be added as a start option:
+
+```erlang
+stubby:start([
+   {"/new/endpoint1", new_endpoint1_handler, []},
+   {"/new/endpoint2", new_endpoint2_handler, []}
+  ])
+```
 
 
 See also
