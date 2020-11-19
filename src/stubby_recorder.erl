@@ -8,12 +8,18 @@
         ]).
 
 -export_type([
-              body/0,
-              result/0
+              stubby_record/0
              ]).
 
--type body() :: term().
--type result() :: {ok, body()}.
+-type stubby_record() :: #{
+                           headers := map(),
+                           scheme := binary(),
+                           host := binary(),
+                           port := integer(),
+                           path := binary(),
+                           qs := binary(),
+                           body := binary()
+                          }.
 
 -define(RECORDER, ?MODULE).
 
@@ -79,14 +85,14 @@ loop(Records, Getters) ->
     end.
 
 %% @doc Puts a record into FIFO queue.
--spec put_recent(term(), body()) -> ok.
+-spec put_recent(term(), stubby_record()) -> ok.
 put_recent(Key, Data) ->
     ?RECORDER ! {put, self(), Key, Data},
     receive X -> X end.
 
 %% @doc Gets a record from FIFO queue.
 %% If empty, the call is blocked until the next enqueue.
--spec get_recent(term()) -> result().
+-spec get_recent(term()) -> {ok, stubby_record()}.
 get_recent(Key) ->
     ?RECORDER ! {get, self(), Key},
     receive X -> X end.
