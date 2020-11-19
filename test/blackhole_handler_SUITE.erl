@@ -34,12 +34,18 @@ request_plain_test(Config) ->
        _
       }} = httpc:request(
              post,
-             {Url, [], "text/plain", Body},
+             {Url, [], "text/xml", Body},
              [],
              []
             ),
-    {ok, #{body := Data}} = stubby:get_recent(?config(path, Config)),
-    ?assertEqual(Body, Data).
+    {ok, #{
+           headers := Headers,
+           body := Data
+          }} = stubby:get_recent(?config(path, Config)),
+    [
+     ?assertMatch(#{<<"content-type">> := <<"text/xml">>}, Headers),
+     ?assertEqual(Body, Data)
+    ].
 
 request_gzip_test(Config) ->
     Url = ?config(url, Config),
@@ -54,8 +60,17 @@ request_gzip_test(Config) ->
              [],
              []
             ),
-    {ok, #{body := Data}} = stubby:get_recent(?config(path, Config)),
-    ?assertEqual(Body, Data).
+    {ok, #{
+           headers := Headers,
+           body := Data
+          }} = stubby:get_recent(?config(path, Config)),
+    [
+     ?assertMatch(#{
+                    <<"content-type">> := <<"text/plain">>,
+                    <<"content-encoding">> := <<"gzip">>
+                   }, Headers),
+     ?assertEqual(Body, Data)
+    ].
 
 slow_request_awaits_test(Config) ->
     Url = ?config(url, Config),
