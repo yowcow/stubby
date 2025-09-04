@@ -12,4 +12,7 @@ clean:
 realclean:
 	rm -rf _build
 
-.PHONY: all test clean realclean
+format:
+	$(REBAR) efmt -w -- rebar.config src/** test/**
+
+.PHONY: all test clean realclean format

@@ -2,6 +2,7 @@
 
 -export([init/2]).
 
+
 %% @doc A blackhole handler mounted to stubby server at <code>/blackhole/[...]</code>.
 %% When requested, a response with status code 204 is returned.
 -spec init(cowboy_req:req(), any()) -> {ok, cowboy_req:req(), any()}.
