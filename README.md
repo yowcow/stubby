@@ -1,19 +1,12 @@
-[![Build Status](https://travis-ci.com/yowcow/stubby.svg?branch=master)](https://travis-ci.com/yowcow/stubby)
-
-stubby
-======
+# stubby
 
 A stub http server and request body recorder.
 
+## Build
 
-Build
------
+    rebar3 compile
 
-    $ rebar3 compile
-
-
-How to use
-----------
+## How to use
 
 ### Configuration
 
@@ -52,14 +45,12 @@ In a testcase, make a request to stubby URL, then get the most recent request to
 
 When no request is recorded yet, this call blocks until the first request is made.
 
-
-Endpoints
----------
+## Endpoints
 
 By default, a booted stubby serves:
 
-* `/`: always responds with status code 200
-* `/blackhole/[...]`: always responds with status code 204
+- `/`: always responds with status code 200
+- `/blackhole/[...]`: always responds with status code 204
 
 Additional cowboy endpoints can be added as a start option:
 
@@ -70,11 +61,9 @@ stubby:start([
   ])
 ```
 
+## See also
 
-See also
---------
-
-* https://github.com/ninenines/cowboy
-* https://erlang.org/doc/apps/common_test/introduction.html
-* https://erlang.org/doc/man/common_test.html
-* https://www.rebar3.org/docs/running-tests#section-common-test
+- <https://github.com/ninenines/cowboy>
+- <https://erlang.org/doc/apps/common_test/introduction.html>
+- <https://erlang.org/doc/man/common_test.html>
+- <https://www.rebar3.org/docs/running-tests#section-common-test>
