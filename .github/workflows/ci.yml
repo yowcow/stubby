@@ -1,0 +1,22 @@
+name: Erlang CI
+
+on: push
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        opt: ["25.3"]
+        rebar3: ["3.23.0"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile
+        run: rebar3 compile
+      - name: Run tests
+        run: rebar3 do eunit,ct
+      - name: Analyze
+        run: rebar3 do dializer,xref
