@@ -28,7 +28,7 @@ start(Host, Routes) ->
     Dispatch =
         cowboy_router:compile([{'_',
                                 Routes
-                                ++ [{"/", stubby_default_hendler, #{}},
+                                ++ [{"/", stubby_default_handler, #{}},
                                     {"/blackhole/[...]", stubby_blackhole_handler, #{}}]}]),
     {ok, _} =
         cowboy:start_clear(?LISTENER,

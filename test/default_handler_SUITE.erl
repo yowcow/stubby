@@ -12,9 +12,7 @@ init(Req, State) ->
     {ok, Resp, State}.
 
 init_per_suite(Config) ->
-    Url = stubby:start([
-                        {"/hello/[:name]", ?MODULE, []}
-                       ]),
+    Url = stubby:start([{"/hello/[:name]", ?MODULE, []}]),
     [{url, Url} | Config].
 
 end_per_suite(_) ->
@@ -22,12 +20,10 @@ end_per_suite(_) ->
     ok.
 
 all() ->
-    [
-     request_root_test,
+    [request_root_test,
      request_injected_route_test,
      recorded_injected_route_test,
-     recorded_root_test
-    ].
+     recorded_root_test].
 
 request_root_test(Config) ->
     Url = ?config(url, Config),
@@ -41,22 +37,14 @@ request_injected_route_test(Config) ->
 
 recorded_root_test(_) ->
     {ok, Record} = stubby:get_recent("/"),
-    ?assertMatch(
-       #{
-         body := <<>>,
-         path := <<"/">>,
-         qs := <<>>
-        },
-       Record
-      ).
+    ?assertMatch(#{body := <<>>,
+                   path := <<"/">>,
+                   qs := <<>>},
+                 Record).
 
 recorded_injected_route_test(_) ->
     {ok, Record} = stubby:get_recent("/hello/world"),
-    ?assertMatch(
-       #{
-         body := <<>>,
-         path := <<"/hello/world">>,
-         qs := <<"foo=bar">>
-        },
-       Record
-      ).
+    ?assertMatch(#{body := <<>>,
+                   path := <<"/hello/world">>,
+                   qs := <<"foo=bar">>},
+                 Record).

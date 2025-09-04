@@ -21,16 +21,12 @@ decode_body(_, Encoding) ->
     throw({content_encoding, Encoding}).
 
 %% @private
--spec build_record(Req::term()) -> stubby_recorder:stubby_record().
+-spec build_record(Req :: term()) -> stubby_recorder:stubby_record().
 build_record(Req) ->
-    build_record(
-      [headers, scheme, host, port, path, qs, body],
-      Req,
-      #{}
-     ).
+    build_record([headers, scheme, host, port, path, qs, body], Req, #{}).
 
 %% @private
 build_record([], _, Acc) ->
     Acc;
-build_record([K|T],  Req, Acc) ->
+build_record([K | T], Req, Acc) ->
     build_record(T, Req, Acc#{K => maps:get(K, Req)}).
