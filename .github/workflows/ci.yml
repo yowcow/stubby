@@ -11,7 +11,7 @@ jobs:
     name: OTP ${{matrix.otp}} / rebar3 ${{matrix.rebar3}}
     strategy:
       matrix:
-        opt: ["25.3"]
+        otp: ["25.3"]
         rebar3: ["3.23.0"]
     steps:
       - uses: actions/checkout@v4
