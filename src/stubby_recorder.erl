@@ -5,16 +5,19 @@
 -export_type([stubby_record/0, stubby_result/0]).
 
 -type stubby_record() ::
-    #{headers := map(),
-      scheme := binary(),
-      host := binary(),
-      port := integer(),
-      path := binary(),
-      qs := binary(),
-      body := binary()}.
+        #{
+          headers := map(),
+          scheme := binary(),
+          host := binary(),
+          port := integer(),
+          path := binary(),
+          qs := binary(),
+          body := binary()
+         }.
 -type stubby_result() :: {ok, stubby_record()}.
 
 -define(RECORDER, ?MODULE).
+
 
 %% @doc Starts and registers a recorder process.
 -spec start() -> ok.
@@ -22,14 +25,17 @@ start() ->
     true = register(?RECORDER, spawn(fun start_recorder/0)),
     ok.
 
+
 %% @doc Stops running recorder process.
 -spec stop() -> ok.
 stop() ->
     stop_recorder().
 
+
 %% @private
 start_recorder() ->
     loop(#{}, #{}).
+
 
 %% @private
 enqueue(Key, Item, Tree) ->
@@ -39,6 +45,7 @@ enqueue(Key, Item, Tree) ->
         _ ->
             Tree#{Key => [Item]}
     end.
+
 
 %% @private
 dequeue(Key, Tree) ->
@@ -51,6 +58,7 @@ dequeue(Key, Tree) ->
         _ ->
             none
     end.
+
 
 %% @private
 loop(Records, Getters) ->
@@ -77,6 +85,7 @@ loop(Records, Getters) ->
             ok
     end.
 
+
 %% @doc Puts a record into FIFO queue.
 -spec put_recent(term(), stubby_record()) -> ok.
 put_recent(Key, Data) ->
@@ -85,6 +94,7 @@ put_recent(Key, Data) ->
         X ->
             X
     end.
+
 
 %% @doc Gets a record from FIFO queue.
 %% If empty, the call is blocked until the next enqueue.
@@ -96,6 +106,7 @@ get_recent(Key) ->
             X
     end.
 
+
 stop_recorder() ->
     ?RECORDER ! {quit, self()},
     receive
@@ -103,9 +114,11 @@ stop_recorder() ->
             X
     end.
 
+
 -ifdef(TEST).
 
 -include_lib("eunit/include/eunit.hrl").
+
 
 enqueue_test_() ->
     Cases =
@@ -117,10 +130,11 @@ enqueue_test_() ->
           #{foo => [bar, foo], bar => []},
           #{foo => [buz, bar, foo], bar => []}}],
     F = fun({Title, Key, Input, Queue, Expected}) ->
-           Actual = enqueue(Key, Input, Queue),
-           {Title, ?_assertEqual(Expected, Actual)}
+                Actual = enqueue(Key, Input, Queue),
+                {Title, ?_assertEqual(Expected, Actual)}
         end,
     lists:map(F, Cases).
+
 
 dequeue_test_() ->
     Cases =
@@ -132,9 +146,10 @@ dequeue_test_() ->
           #{foo => [buz, bar, foo], bar => []},
           {foo, #{foo => [buz, bar], bar => []}}}],
     F = fun({Title, Key, Input, Expected}) ->
-           Actual = dequeue(Key, Input),
-           {Title, ?_assertEqual(Expected, Actual)}
+                Actual = dequeue(Key, Input),
+                {Title, ?_assertEqual(Expected, Actual)}
         end,
     lists:map(F, Cases).
+
 
 -endif.

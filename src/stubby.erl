@@ -5,20 +5,23 @@
 %% See https://github.com/ninenines/cowboy/blob/master/src/cowboy_router.erl for details.
 -type cowboy_route_match() :: '_' | iodata().
 -type cowboy_route_path() ::
-    {Path :: cowboy_route_match(), Handler :: module(), Opts :: any()}.
+        {Path :: cowboy_route_match(), Handler :: module(), Opts :: any()}.
 -type url() :: string().
 
 -define(LISTENER, ?MODULE).
+
 
 %% @doc Starts a stubby server with default configuration.
 -spec start() -> url().
 start() ->
     start([]).
 
+
 %% @doc Starts a stubby server with optional routes.
 -spec start([cowboy_route_path()]) -> url().
 start(Routes) ->
     start("localhost", Routes).
+
 
 %% @doc Starts a stubby server with optional hostname and routes configurations.
 -spec start(string(), [cowboy_route_path()]) -> url().
@@ -27,19 +30,22 @@ start(Host, Routes) ->
     ok = application:start(ranch),
     Dispatch =
         cowboy_router:compile([{'_',
-                                Routes
-                                ++ [{"/", stubby_default_handler, #{}},
-                                    {"/blackhole/[...]", stubby_blackhole_handler, #{}}]}]),
+                                Routes ++
+                                [{"/", stubby_default_handler, #{}},
+                                 {"/blackhole/[...]", stubby_blackhole_handler, #{}}]}]),
     {ok, _} =
         cowboy:start_clear(?LISTENER,
                            [{port, 0}],
-                           #{env => #{dispatch => Dispatch},
+                           #{
+                             env => #{dispatch => Dispatch},
                              middlewares =>
-                                 [cowboy_router, stubby_recorder_middleware, cowboy_handler]}),
+                                 [cowboy_router, stubby_recorder_middleware, cowboy_handler]
+                            }),
     Url = lists:flatten(
-              io_lib:format("http://~s:~p", [Host, ranch:get_port(?LISTENER)])),
+            io_lib:format("http://~s:~p", [Host, ranch:get_port(?LISTENER)])),
     ok = check_ready(Url),
     Url.
+
 
 %% @private
 check_ready(Url) ->
@@ -52,6 +58,7 @@ check_ready(Url) ->
             check_ready(Url)
     end.
 
+
 %% @doc Stops a running stubby server.
 -spec stop() -> ok.
 stop() ->
@@ -60,6 +67,7 @@ stop() ->
     ok = stubby_recorder:stop(),
     error_logger:info_msg("server ~p is gone!", [?LISTENER]),
     ok.
+
 
 %% @doc Fetches a record from the recorder FIFO queue.
 %% If empty, the call is blocked until the next enqueue.
