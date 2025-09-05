@@ -16,15 +16,15 @@
 <h2><a name="types">Data Types</a></h2>
 
 <h3 class="typedecl"><a name="type-cowboy_route_match">cowboy_route_match()</a></h3>
-<p><tt>cowboy_route_match() = '_' | iodata()</tt></p>
+<p><code>cowboy_route_match() = '_' | iodata()</code></p>
 
 
 <h3 class="typedecl"><a name="type-cowboy_route_path">cowboy_route_path()</a></h3>
-<p><tt>cowboy_route_path() = {Path::<a href="#type-cowboy_route_match">cowboy_route_match()</a>, Handler::module(), Opts::any()}</tt></p>
+<p><code>cowboy_route_path() = {Path::<a href="#type-cowboy_route_match" docgen-rel="seetype" docgen-href="#cowboy_route_match/0">cowboy_route_match()</a>, Handler::module(), Opts::any()}</code></p>
 
 
 <h3 class="typedecl"><a name="type-url">url()</a></h3>
-<p><tt>url() = string()</tt></p>
+<p><code>url() = string()</code></p>
 
 
 <h2><a name="index">Function Index</a></h2>
@@ -39,32 +39,32 @@
 
 <h3 class="function"><a name="get_recent-1">get_recent/1</a></h3>
 <div class="spec">
-<p><tt>get_recent(Path::string()) -&gt; <a href="stubby_recorder.html#type-result">stubby_recorder:result()</a></tt><br></p>
+<p><code>get_recent(Path::string()) -&gt; {ok, [<a href="#type-stubby_record" docgen-rel="seetype" docgen-href="#stubby_record/0">stubby_record()</a>]}</code><br></p>
 <p> </p>
 </div><p>Fetches a record from the recorder FIFO queue.
   If empty, the call is blocked until the next enqueue.</p>
 
 <h3 class="function"><a name="start-0">start/0</a></h3>
 <div class="spec">
-<p><tt>start() -&gt; <a href="#type-url">url()</a></tt><br></p>
+<p><code>start() -&gt; <a href="#type-url" docgen-rel="seetype" docgen-href="#url/0">url()</a></code><br></p>
 <p> </p>
 </div><p>Starts a stubby server with default configuration.</p>
 
 <h3 class="function"><a name="start-1">start/1</a></h3>
 <div class="spec">
-<p><tt>start(Routes::[<a href="#type-cowboy_route_path">cowboy_route_path()</a>]) -&gt; <a href="#type-url">url()</a></tt><br></p>
+<p><code>start(Routes::[<a href="#type-cowboy_route_path" docgen-rel="seetype" docgen-href="#cowboy_route_path/0">cowboy_route_path()</a>]) -&gt; <a href="#type-url" docgen-rel="seetype" docgen-href="#url/0">url()</a></code><br></p>
 <p> </p>
 </div><p>Starts a stubby server with optional routes.</p>
 
 <h3 class="function"><a name="start-2">start/2</a></h3>
 <div class="spec">
-<p><tt>start(Host::string(), Routes::[<a href="#type-cowboy_route_path">cowboy_route_path()</a>]) -&gt; <a href="#type-url">url()</a></tt><br></p>
+<p><code>start(Host::string(), Routes::[<a href="#type-cowboy_route_path" docgen-rel="seetype" docgen-href="#cowboy_route_path/0">cowboy_route_path()</a>]) -&gt; <a href="#type-url" docgen-rel="seetype" docgen-href="#url/0">url()</a></code><br></p>
 <p> </p>
 </div><p>Starts a stubby server with optional hostname and routes configurations.</p>
 
 <h3 class="function"><a name="stop-0">stop/0</a></h3>
 <div class="spec">
-<p><tt>stop() -&gt; ok</tt><br></p>
+<p><code>stop() -&gt; ok</code><br></p>
 <p> </p>
 </div><p>Stops a running stubby server.</p>
 <hr>
