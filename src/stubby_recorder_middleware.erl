@@ -11,7 +11,7 @@
 execute(Req0, Env) ->
     Method = cowboy_req:method(Req0),
     Path = cowboy_req:path(Req0),
-    {ok, Data0, Req} = cowboy_req:read_body(Req0, #{length => infinity}),
+    {ok, Data0, Req} = cowboy_req:read_body(Req0),
     Encoding = cowboy_req:header(<<"content-encoding">>, Req0, undefined),
     Data = decode_body(Data0, Encoding),
     ok = stubby_server:enqueue({Method, Path}, build_record(Req0#{body => Data})),
