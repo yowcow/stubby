@@ -17,7 +17,7 @@ end_per_suite(_Config) ->
 
 
 all() ->
-    [request_plain_test, request_gzip_test].
+    [request_plain_test, request_gzip_test, request_large_body_test].
 
 
 request_plain_test(Config) ->
@@ -47,3 +47,16 @@ request_gzip_test(Config) ->
                    },
                   Headers),
      ?assertEqual(Body, Data)].
+
+
+request_large_body_test(Config) ->
+    Url = ?config(url, Config),
+    % Create a body larger than default cowboy chunk size (8KB)
+    LargeBody = binary:copy(<<"This is a test body that will be repeated many times to exceed the default chunk size. ">>, 200),
+    {ok, {{"HTTP/1.1", 204, _}, _, _}} =
+        httpc:request(post, {Url, [], "application/json", LargeBody}, [], []),
+    {ok, [#{headers := Headers, body := Data} | _]} =
+        stubby:get_recent("POST", ?config(path, Config)),
+    [?assertMatch(#{<<"content-type">> := <<"application/json">>}, Headers),
+     ?assertEqual(LargeBody, Data),
+     ?assert(byte_size(LargeBody) > 8192)].
