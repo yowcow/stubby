@@ -37,7 +37,7 @@ handle_cast({Key, Val}, State) ->
 
 -spec handle_call({dequeue, key()}, From :: gen_server:from(), state()) ->
           {reply, {ok, [val()]}, state()};
-       (reset, From :: gen_server:from(), state()) ->
+                 (reset, From :: gen_server:from(), state()) ->
           {reply, {ok, state()}, state()}.
 handle_call({dequeue, Key}, _From, State) ->
     Vs = maps:get(Key, State, []),

@@ -4,6 +4,8 @@
 
 -include("stubby.hrl").
 
+-include_lib("kernel/include/logger.hrl").
+
 %% See https://github.com/ninenines/cowboy/blob/master/src/cowboy_router.erl for details.
 -type cowboy_route_match() :: '_' | iodata().
 -type cowboy_route_path() ::
@@ -28,7 +30,7 @@ start(Routes) ->
 %% @doc Starts a stubby server with optional hostname and routes configurations.
 -spec start(string(), [cowboy_route_path()]) -> url().
 start(Host, Routes) ->
-    ok = application:start(ranch),
+    _ = application:ensure_started(ranch),
     Dispatch =
         cowboy_router:compile([{'_',
                                 Routes ++
@@ -53,10 +55,10 @@ start(Host, Routes) ->
 check_ready(Url) ->
     case httpc:request(Url ++ "/") of
         {ok, _} ->
-            error_logger:info_msg("server ~p is ready!", [?LISTENER]),
+            ?LOG_INFO("server ~p is ready!", [?LISTENER]),
             ok;
         Err ->
-            error_logger:info_msg("server ~p is not ready? :: ~p", [?LISTENER, Err]),
+            ?LOG_WARNING("server ~p is not ready? :: ~p", [?LISTENER, Err]),
             check_ready(Url)
     end.
 
@@ -66,8 +68,7 @@ check_ready(Url) ->
 stop() ->
     ok = stubby_server:stop(),
     ok = cowboy:stop_listener(?LISTENER),
-    ok = application:stop(ranch),
-    error_logger:info_msg("server ~p is gone!", [?LISTENER]),
+    ?LOG_INFO("server ~p is gone!", [?LISTENER]),
     ok.
 
 
