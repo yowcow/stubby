@@ -3,6 +3,9 @@ REBAR := rebar3
 all:
 	$(REBAR) do compile,edoc
 
+docs:
+	$(REBAR) edoc
+
 test:
 	$(REBAR) do eunit,ct,dialyzer,xref
 
@@ -15,4 +18,4 @@ realclean:
 format:
 	$(REBAR) efmt -w -- rebar.config src/** test/**
 
-.PHONY: all test clean realclean format
+.PHONY: all docs test clean realclean format

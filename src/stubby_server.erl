@@ -15,10 +15,12 @@
 -type key() :: {method(), path()}.
 -type state() :: #{key() => [val()]}.
 
+
 -spec init(any()) -> {ok, state()}.
 init(_) ->
     ?LOG_INFO("stubby_server started", []),
     {ok, maps:new()}.
+
 
 -spec handle_cast({key(), val()}, state()) -> {noreply, state()}.
 handle_cast({Key, Val}, State) ->
@@ -32,6 +34,7 @@ handle_cast({Key, Val}, State) ->
     ?LOG_INFO("stubby_server enqueued ~p => ~p", [Key, Val]),
     {noreply, NewState}.
 
+
 -spec handle_call({dequeue, key()}, pid(), state()) -> {reply, {ok, [val()]}, state()};
                  (reset, pid(), state()) -> {reply, {ok, state()}, state()}.
 handle_call({dequeue, Key}, _From, State) ->
@@ -43,23 +46,28 @@ handle_call(reset, _From, State) ->
     ?LOG_INFO("stubby_server reset from ~p to empty", [State]),
     {reply, {ok, State}, maps:new()}.
 
+
 -spec start() -> {ok, pid()}.
 start() ->
     ?LOG_INFO("stubby_server starting", []),
     gen_server:start({local, ?MODULE}, ?MODULE, [], []).
+
 
 -spec stop() -> ok.
 stop() ->
     ?LOG_INFO("stubby_server stopping", []),
     gen_server:stop(?MODULE).
 
+
 -spec enqueue(key(), val()) -> ok.
 enqueue(Key, Val) ->
     gen_server:cast(?MODULE, {Key, Val}).
 
+
 -spec dequeue(key()) -> {ok, [val()]}.
 dequeue(Key) ->
     gen_server:call(?MODULE, {dequeue, Key}).
+
 
 -spec reset() -> {ok, state()}.
 reset() ->

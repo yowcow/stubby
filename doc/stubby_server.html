@@ -41,6 +41,7 @@
 <tr><td valign="top"><a href="#handle_call-3">handle_call/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#handle_cast-2">handle_cast/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#init-1">init/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#reset-0">reset/0</a></td><td></td></tr>
 <tr><td valign="top"><a href="#start-0">start/0</a></td><td></td></tr>
 <tr><td valign="top"><a href="#stop-0">stop/0</a></td><td></td></tr>
 </table>
@@ -61,7 +62,8 @@
 
 <h3 class="function"><a name="handle_call-3">handle_call/3</a></h3>
 <div class="spec">
-<p><code>handle_call(Key::<a href="#type-key" docgen-rel="seetype" docgen-href="#key/0">key()</a>, From::pid(), State::<a href="#type-state" docgen-rel="seetype" docgen-href="#state/0">state()</a>) -&gt; {reply, {ok, [<a href="#type-val" docgen-rel="seetype" docgen-href="#val/0">val()</a>]}, <a href="#type-state" docgen-rel="seetype" docgen-href="#state/0">state()</a>}</code><br></p>
+<p><code>handle_call(X1::{dequeue, <a href="#type-key" docgen-rel="seetype" docgen-href="#key/0">key()</a>}, From::pid(), State::<a href="#type-state" docgen-rel="seetype" docgen-href="#state/0">state()</a>) -&gt; {reply, {ok, [<a href="#type-val" docgen-rel="seetype" docgen-href="#val/0">val()</a>]}, <a href="#type-state" docgen-rel="seetype" docgen-href="#state/0">state()</a>}</code><br></p><p><code>handle_call(X1::reset, From::pid(), State::<a href="#type-state" docgen-rel="seetype" docgen-href="#state/0">state()</a>) -&gt; {reply, {ok, <a href="#type-state" docgen-rel="seetype" docgen-href="#state/0">state()</a>}, <a href="#type-state" docgen-rel="seetype" docgen-href="#state/0">state()</a>}</code><br></p>
+<p> </p>
 <p> </p>
 </div>
 
@@ -74,6 +76,12 @@
 <h3 class="function"><a name="init-1">init/1</a></h3>
 <div class="spec">
 <p><code>init(X1::any()) -&gt; {ok, <a href="#type-state" docgen-rel="seetype" docgen-href="#state/0">state()</a>}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="reset-0">reset/0</a></h3>
+<div class="spec">
+<p><code>reset() -&gt; {ok, <a href="#type-state" docgen-rel="seetype" docgen-href="#state/0">state()</a>}</code><br></p>
 <p> </p>
 </div>
 

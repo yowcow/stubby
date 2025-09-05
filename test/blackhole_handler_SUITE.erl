@@ -5,16 +5,20 @@
 -include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
+
 init_per_suite(Config) ->
     Path = "/blackhole/",
     Url = stubby:start() ++ Path,
     [{url, Url}, {path, Path} | Config].
 
+
 end_per_suite(_Config) ->
     stubby:stop().
 
+
 all() ->
     [request_plain_test, request_gzip_test].
+
 
 request_plain_test(Config) ->
     Url = ?config(url, Config),
@@ -26,6 +30,7 @@ request_plain_test(Config) ->
     [?assertMatch(#{<<"content-type">> := <<"text/xml">>}, Headers),
      ?assertEqual(Body, Data)].
 
+
 request_gzip_test(Config) ->
     Url = ?config(url, Config),
     Body = <<"Hello in gzipped text">>,
@@ -36,7 +41,9 @@ request_gzip_test(Config) ->
                       []),
     {ok, [#{headers := Headers, body := Data} | _]} =
         stubby:get_recent("POST", ?config(path, Config)),
-    [?assertMatch(#{<<"content-type">> := <<"text/plain">>,
-                    <<"content-encoding">> := <<"gzip">>},
+    [?assertMatch(#{
+                    <<"content-type">> := <<"text/plain">>,
+                    <<"content-encoding">> := <<"gzip">>
+                   },
                   Headers),
      ?assertEqual(Body, Data)].
