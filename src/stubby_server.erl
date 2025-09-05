@@ -35,9 +35,9 @@ handle_cast({Key, Val}, State) ->
     {noreply, NewState}.
 
 
--spec handle_call({dequeue, key()}, {pid(), gen_server:reply_tag()}, state()) ->
+-spec handle_call({dequeue, key()}, gen_server:from(), state()) ->
           {reply, {ok, [val()]}, state()};
-                 (reset, {pid(), gen_server:reply_tag()}, state()) ->
+                 (reset, gen_server:from(), state()) ->
           {reply, {ok, state()}, state()}.
 handle_call({dequeue, Key}, _From, State) ->
     Vs = maps:get(Key, State, []),
