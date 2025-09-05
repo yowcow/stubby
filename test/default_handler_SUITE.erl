@@ -19,8 +19,7 @@ init_per_suite(Config) ->
 
 
 end_per_suite(_) ->
-    ok = stubby:stop(),
-    ok.
+    stubby:stop().
 
 
 all() ->
@@ -43,7 +42,7 @@ request_injected_route_test(Config) ->
 
 
 recorded_root_test(_) ->
-    {ok, Record} = stubby:get_recent("/"),
+    {ok, [Record]} = stubby:get_recent("GET", "/"),
     ?assertMatch(#{
                    body := <<>>,
                    path := <<"/">>,
@@ -53,7 +52,7 @@ recorded_root_test(_) ->
 
 
 recorded_injected_route_test(_) ->
-    {ok, Record} = stubby:get_recent("/hello/world"),
+    {ok, [Record]} = stubby:get_recent("GET", "/hello/world"),
     ?assertMatch(#{
                    body := <<>>,
                    path := <<"/hello/world">>,

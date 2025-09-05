@@ -1,6 +1,8 @@
 -module(stubby).
 
--export([start/0, start/1, start/2, stop/0, get_recent/1]).
+-export([start/0, start/1, start/2, stop/0, get_recent/2, reset/0]).
+
+-include("stubby.hrl").
 
 %% See https://github.com/ninenines/cowboy/blob/master/src/cowboy_router.erl for details.
 -type cowboy_route_match() :: '_' | iodata().
@@ -26,7 +28,6 @@ start(Routes) ->
 %% @doc Starts a stubby server with optional hostname and routes configurations.
 -spec start(string(), [cowboy_route_path()]) -> url().
 start(Host, Routes) ->
-    ok = stubby_recorder:start(),
     ok = application:start(ranch),
     Dispatch =
         cowboy_router:compile([{'_',
@@ -44,6 +45,7 @@ start(Host, Routes) ->
     Url = lists:flatten(
             io_lib:format("http://~s:~p", [Host, ranch:get_port(?LISTENER)])),
     ok = check_ready(Url),
+    {ok, _} = stubby_server:start(),
     Url.
 
 
@@ -62,15 +64,20 @@ check_ready(Url) ->
 %% @doc Stops a running stubby server.
 -spec stop() -> ok.
 stop() ->
+    ok = stubby_server:stop(),
     ok = cowboy:stop_listener(?LISTENER),
     ok = application:stop(ranch),
-    ok = stubby_recorder:stop(),
     error_logger:info_msg("server ~p is gone!", [?LISTENER]),
     ok.
 
 
 %% @doc Fetches a record from the recorder FIFO queue.
 %% If empty, the call is blocked until the next enqueue.
--spec get_recent(string()) -> stubby_recorder:stubby_result().
-get_recent(Path) ->
-    stubby_recorder:get_recent(list_to_binary(Path)).
+-spec get_recent(Method :: string(), Path :: string()) -> {ok, [stubby_record()]}.
+get_recent(Method, Path) ->
+    stubby_server:dequeue({list_to_binary(Method), list_to_binary(Path)}).
+
+
+-spec reset() -> {ok, term()}.
+reset() ->
+    stubby_server:reset().
